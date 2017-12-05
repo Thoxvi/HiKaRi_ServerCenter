@@ -26,7 +26,8 @@ class ExecutiveSword:
                 self.services[service.name] = [service]
             else:
                 if LamdbaChain(self.services[service.name]).filter(lambda x: str(x) == str(service)).len() == 1:
-                    self.logger.debug("exist but += "+str(KILL_EVENT_VALUE)+"\t"+str(self.killed_list[str(service)]))
+                    self.logger.debug(
+                        "exist but += " + str(KILL_EVENT_VALUE) + "\t" + str(self.killed_list[str(service)]))
                     self.killed_list[str(service)] += KILL_EVENT_VALUE
                     return
                 self.services[service.name].append(service)
@@ -76,6 +77,9 @@ class ExecutiveSword:
     def clear(self):
         self.__init__()
         self.logger.info("clear done.")
+
+    def show(self):
+        return self.killed_list.keys()
 
 
 if __name__ == "__main__":

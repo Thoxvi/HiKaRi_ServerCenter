@@ -11,9 +11,9 @@ es = ExecutiveSword()
 logger = Logger("Main")
 
 
-# @app.route('/', methods=['GET'])
-# def test():
-#     return render_template("test.html")
+@app.route('/', methods=['GET'])
+def test():
+    return render_template("test.html",info=es.show())
 
 
 # @app.route('/api/registered', methods=['POST'])
