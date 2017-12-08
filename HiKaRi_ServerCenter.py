@@ -1,7 +1,7 @@
 from flask import Flask, request, abort, render_template
 from Content.ExecutiveSword import ExecutiveSword
 from Content.Data import Service
-from Tools.LamdbaChain import LamdbaChain
+from Tools.Fc import Fc
 from Log.Logger import Logger
 from Config import *
 import json
@@ -34,12 +34,12 @@ def response_registered():
 
 @app.route('/api/ask/<name>', methods=['GET'])
 def response_ask_get(name):
-    return json.dumps(LamdbaChain(es.get(name)).map(lambda x: x.toDict()).done())
+    return json.dumps(Fc(es.get(name)).map(lambda x: x.toDict()).done())
 
 
 @app.route('/api/ask', methods=['POST'])
 def response_ask_post():
-    return json.dumps(LamdbaChain(es.get(request.form["name"])).map(lambda x: x.toDict()).done())
+    return json.dumps(Fc(es.get(request.form["name"])).map(lambda x: x.toDict()).done())
 
 
 @app.errorhandler(404)

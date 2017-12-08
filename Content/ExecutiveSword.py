@@ -1,7 +1,7 @@
 from threading import Thread
 from Content.Data import Service
 from Log.Logger import Logger
-from Tools.LamdbaChain import LamdbaChain
+from Tools.Fc import Fc
 from Config import *
 import time
 
@@ -25,15 +25,18 @@ class ExecutiveSword:
             if self.services.get(service.name, -1) == -1:
                 self.services[service.name] = [service]
             else:
-                if LamdbaChain(self.services[service.name]).filter(lambda x: str(x) == str(service)).len() == 1:
-                    self.logger.debug(
-                        "exist but += " + str(KILL_EVENT_VALUE) + "\t" + str(self.killed_list[str(service)]))
-                    self.killed_list[str(service)] += KILL_EVENT_VALUE
+                if Fc(self.services[service.name]).filter(lambda x: str(x) == str(service)).len() == 1:
+                    if self.killed_list[str(service)] < KILL_MAX_VALUE:
+                        self.logger.debug(
+                            "exist but " + str(self.killed_list[str(service)]) + "+= " + str(KILL_DEC_VALUE))
+                        self.killed_list[str(service)] += KILL_DEC_VALUE
+                    else:
+                        self.logger.debug("exist and it is " + str(self.killed_list[str(service)]))
                     return
                 self.services[service.name].append(service)
 
             if self.killed_list.get(str(service), -1) == -1:
-                self.killed_list[str(service)] = KILL_INITIAL_VALUE
+                self.killed_list[str(service)] = KILL_MAX_VALUE
                 self.logger.debug(str(service) + "\t" + str(self.killed_list[str(service)]))
                 self.logger.info("add {name} done.".format(name=service.name))
         else:
@@ -44,7 +47,7 @@ class ExecutiveSword:
         name = s.split("://")[0]
         services = self.services.get(name, -1)
         if services != -1:
-            ls = LamdbaChain(services).filter(lambda x: str(x) == s)
+            ls = Fc(services).filter(lambda x: str(x) == s)
             if (ls.len() != 0):
                 services.remove(ls.done()[0])
                 self.logger.info("del {s} done.".format(s=s))
@@ -57,11 +60,11 @@ class ExecutiveSword:
             pass
 
     def killall(self):
-        time.sleep(KILL_INTERVAL)
+        time.sleep(KILL_CYCLE)
         for k, v in self.killed_list.items():
-            self.killed_list[k] -= KILL_EVENT_VALUE
+            self.killed_list[k] -= KILL_DEC_VALUE
             self.logger.debug(k + "\t" + str(v))
-        lc = LamdbaChain(self.killed_list.keys()).filter(lambda x: self.killed_list[x] <= 0)
+        lc = Fc(self.killed_list.keys()).filter(lambda x: self.killed_list[x] <= 0)
         lc.map(lambda x: self.delete(x))
         lc.map(lambda x: self.killed_list.pop(x, -1))
 
@@ -90,6 +93,6 @@ if __name__ == "__main__":
     es.add(s)
     es.add(s)
 
-    print(LamdbaChain(es.get("mmm")).map(lambda x: str(x)).done())
+    print(Fc(es.get("mmm")).map(lambda x: str(x)).done())
     es.delete(str(s))
     print(es.get("mmm"))
